@@ -1,1 +1,1 @@
-A chat application that provides real-time function using websockets
+A chat application that provides real-time function using websockets 
