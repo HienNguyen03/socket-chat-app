@@ -23,7 +23,9 @@ class App extends Component {
   componentWillMount () {
     this.socket = io('http://localhost:3000');
     this.socket.on('connect', this.connect.bind(this));
+    this.socket.on('disconnect', this.disconnect.bind(this));
     this.socket.on('messageAdded', this.onMessageAdded.bind(this));
+    this.socket.on('userJoined', this.onUserJoined.bind(this));
   }
 
   connect () {
@@ -31,10 +33,15 @@ class App extends Component {
     console.log('Connected: ' + this.socket.id);
   }
 
-  disconnect () {
+  disconnect (users) {
+    this.setState({users: users});
     this.setState({
       status: 'disconnected'
     });
+  }
+
+  onUserJoined (users) {
+    this.setState({users: users});
   }
 
   onMessageAdded (message) {
@@ -48,20 +55,31 @@ class App extends Component {
     this.socket.emit(eventName, payload);
   }
 
-  render () {
-    console.log(this.state.messages);
-    return (
-      <div className="row">
-        <div className="col-md-4">
-          <UserList {...this.state}/>
-        </div>
+  setUser (user) {
+    this.setState({user: user});
+  }
 
-        <div className="col-md-8">
-          <MessageList {...this.state}/>
-          <MessageForm emit={this.emit.bind(this)} {...this.state}/>
+  render () {
+    console.log('users',this.state.users);
+    if (this.state.user == '') {
+      return (
+        <UserForm emit={this.emit.bind(this)} setUser={this.setUser.bind(this)}/>
+      );
+    } else {
+      return (
+        <div className="row">
+          <div className="col-md-4">
+            <UserList {...this.state}/>
+          </div>
+
+          <div className="col-md-8">
+            <MessageList {...this.state}/>
+            <MessageForm emit={this.emit.bind(this)} {...this.state}/>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
+
   }
 }
 
